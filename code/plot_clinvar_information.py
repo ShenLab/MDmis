@@ -10,6 +10,7 @@ clinvar_data = "/share/vault/Users/az2798/ClinVar_Data/training.csv"
 data_dir = "/home/az2798/IDR_cons/data/"
 
 df = pd.read_csv(clinvar_data)
+clinvar_df = df.copy(deep=True)
 print(df.shape)
 mapped_protein_seqs_df = pd.read_csv(f"{data_dir}mapped_protein_seqs.csv",
                                     index_col=0)
@@ -53,20 +54,25 @@ plt.clf()
 
 #######
 
+clinvar_df.rename(columns = {"score":"outcome", "uniprotID":"protein_id", "pos.orig": "location", 
+                       "alt": "changed_residue", 'data_source': 'Data Source'}, inplace=True)
+clinvar_df = clinvar_df[["outcome", "protein_id", "location", "changed_residue", "VarID", 
+                          'Data Source']]
 
+mapped_protein_seqs_df.rename(columns={"source": "MD Data Source"}, inplace=True)
 clinvar_proteins = pd.merge(left = mapped_protein_seqs_df,
-                          right = df, left_on="UniProtID", right_on = "uniprotID", how = "inner")
+                          right = clinvar_df, left_on="UniProtID", right_on = "protein_id", how = "inner")
 
 clinvar_proteins.drop_duplicates(subset = ["VarID"], inplace=True)
 print(clinvar_proteins.head())
 
-clinvar_proteins = clinvar_proteins.rename(columns={'source': 'MD Data Source', 
-                                                    'pos.orig': 'location'})
+
 clinvar_proteins["location"] = clinvar_proteins["location"].astype(int)
 clinvar_proteins["start"] = clinvar_proteins["protein_start_end"].str.split("_").str[1].astype(int)
 clinvar_proteins["end"] = clinvar_proteins["protein_start_end"].str.split("_").str[2].astype(int)
 
-variants_to_subset = set(clinvar_proteins[(clinvar_proteins["location"] >= clinvar_proteins["start"]) & (clinvar_proteins["location"] <= clinvar_proteins["end"])]["VarID"])
+variants_to_subset = set(clinvar_proteins[(clinvar_proteins["location"] >= clinvar_proteins["start"]) &
+                                           (clinvar_proteins["location"] <= clinvar_proteins["end"])]["VarID"])
 subset_mapped_proteins = clinvar_proteins[clinvar_proteins["VarID"].isin(variants_to_subset)]
 print( "Unique Protein regions", len(subset_mapped_proteins["protein_start_end"].unique() ))
 subset_mapped_proteins.to_csv(f'{data_dir}proteins_clinvar_mapped.csv')
