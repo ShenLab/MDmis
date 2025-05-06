@@ -6,4 +6,15 @@ functional annotations of protein residue sites and protein regions, and we perf
 
 This repository contains the code used to train MDmis, perform analysis, run simulations of mutated sequences, and extract features. All code uses Python and Command Line.
 
+Majority of the training and analysis can be done using MDmis_env.yml. You can install this envionment as:
+```conda env create -f MDmis_env.yml``` 
 
+Other analysis, such as simulating MD trajectories using CALVADOS2, converting coarse-grained trajectories to all-atom, and then processing MD trajectories with GetContacts require their own environments due to conflicts in packages and their versions. We refer you to 
+1. https://github.com/KULL-Centre/CALVADOS.git
+2. https://github.com/huhlim/cg2all.git
+3. https://github.com/getcontacts/getcontacts.git
+   
+Respectively for their codebase and setup. 
+
+# Contact
+For any specific information about code or data processing, you may reach out az2798@cumc.columbia.edu or publish an issue on our GitHub repo.
