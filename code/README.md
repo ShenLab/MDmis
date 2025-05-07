@@ -1,6 +1,8 @@
 The code and scripts used in "Molecular dynamics simulations of intrinsically disordered protein regions enable biophysical interpretation of variant effect predictors". 
 For reproducing the study's results and figures, you may follow the steps outlined below.
 
+**Before starting, it is key to edit the global paths in the config.py file. While running the code, you may see what each path's purpose is.**
+
 ## 0. Data pre-processing
 1. The data pre-processing folder allows processing of DMS labels by extracting labels from ProteinGym files of assays. It requires a DMS_metadata file that can be found on our Zenodo.
 2. You may also process the dbNSFP database to extract GERP RS scores, and other minor tasks. dbNSFP can be found at this [link](https://www.dbnsfp.org/)
