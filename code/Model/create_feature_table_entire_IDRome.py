@@ -5,17 +5,17 @@ from matplotlib import gridspec
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
-from utils import *
 import tqdm
-from predict_MDmis import *
 import pickle
-import multiprocessing as mp
 import argparse
 import scipy.stats as ss
 import pathlib
 import sys
 ROOT = pathlib.Path(__file__).parent
 sys.path.append(ROOT)
+sys.path.append(os.path.join(ROOT, "Data_processing/"))
+from utils import *
+from predict_MDmis import *
 from config import config
 
 from feature_extraction_MSA import *
