@@ -17,6 +17,12 @@ matplotlib.rcParams.update({'font.size': 13})
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--mut_type',
@@ -26,8 +32,8 @@ def main():
     parser.add_argument('-s', '--set_mutations', help= "Indicates the starting index for the batch of runs.")
     args = parser.parse_args()
     
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/clinical_figures"
+    data_dir = os.path.abspath(config["data_dir"])
+    results_dir = os.path.abspath(config["results_dir"])
 
 
     train_feature_table = pd.read_csv(
@@ -43,7 +49,7 @@ def main():
 
     IDR_MD_features = pd.concat([train_feature_table, val_feature_table],
                                 axis = 0)
-    RMSF_column_name = "Res_MD_3"
+    RMSF_column_name = "Res_MD_3_pos_0" # used earlier. You may use a Region Length column with a cutoff of 800
 
     IDR_MD_features['RMSF Category'] = np.select(
             [
@@ -116,7 +122,7 @@ def main():
                 )
     processed_sequences_df = pd.DataFrame(processed_sequences)
     processed_sequences_df.to_csv(
-        f"/home/az2798/MDmis/data/calvados_mutations_{args.mut_type}_{args.set_mutations}.csv", index=False)
+        f"{data_dir}calvados_mutations_{args.mut_type}_{args.set_mutations}.csv", index=False)
 
     #results_dir = "/share/vault/Users/az2798/CALVADOS_runs/Pathogenic_High_RMSF_Shannon/"
     results_dir = args.directory

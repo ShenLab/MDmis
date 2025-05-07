@@ -9,12 +9,18 @@ import glob
 from utils import *
 import argparse
 
-
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
+from utils import *
 def preprocess_proteome_information(labels_df,
         labels_location_column_name, labels_changed_aa_column_name,
         GERP_df, GERP_columns_to_split, GERP_char_to_split,
         alpha_missense_table, ESM_table,
-        pLDDT_df, MSA_coevolution_df):
+        pLDDT_df):
 
 
     print(len(GERP_df["Uniprot_acc"].unique()), "Unique Proteins in GERP")
@@ -89,19 +95,7 @@ def preprocess_proteome_information(labels_df,
 
     merged_pLDDT.drop(columns=["_merge"], inplace = True)
 
-    ### Merge with co-evolutionary signal
-
-
-    merged_coevolution = pd.merge(left = merged_pLDDT,
-                                right = MSA_coevolution_df,
-             left_on=["Ensembl_transcriptid", labels_location_column_name],
-             right_on=["ENST_id", "Location_Sequence"],
-             how = "left", indicator=True)
-
-    
-    merged_coevolution.drop(columns=["_merge"], inplace = True)
-
-    return merged_coevolution
+    return merged_pLDDT
 
 
 
@@ -109,8 +103,8 @@ def main():
 
     ### Define paths
 
-    data_dir = "/home/az2798/MDmis/data/"
-    vault_dir = "/nfs/user/Users/az2798/"
+    data_dir = os.path.abspath(config["data_dir"])
+    vault_dir = os.path.abspath(config["vault_dir"])
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--clinical", action="store_true",
@@ -161,23 +155,12 @@ def main():
                                             "processed_pLDDT_scores.csv"), 
                                 index_col=0, low_memory=False)
     
-    ### Preprocess and concatenate MSA coevolution features
-    list_of_MSA_feature_paths = glob.glob(os.path.join(data_dir, 
-        "MSA_coevolution_features_MI",
-        "MSA_coevolution_features_*"))
-    list_of_MSA_feature_dfs = [pd.read_csv(path, index_col = 0) for path in list_of_MSA_feature_paths]
-
-    MSA_feature_table_combined = pd.concat(list_of_MSA_feature_dfs, axis = 0)
-    MSA_feature_table_combined.rename({"ENST_id.1": "Gene_id"}, axis=1, inplace=True)
-    MSA_feature_table_combined = MSA_feature_table_combined[MSA_feature_table_combined["Location_Sequence"]!= "-"] #removing gaps
-    MSA_feature_table_combined["Location_Sequence"] = MSA_feature_table_combined["Location_Sequence"].astype(int)
-    ###
+    
 
     merged_proteome_information = preprocess_proteome_information(processed_labels_df, 
                                     location_column_name, changed_residue_column,
                                     GERP_df, GERP_columns_to_split, GERP_char_to_split,
-                                    alpha_missense_table, ESM_table, pLDDT_df,
-                                    MSA_feature_table_combined
+                                    alpha_missense_table, ESM_table, pLDDT_df
                                     )
     
     if clinical:
