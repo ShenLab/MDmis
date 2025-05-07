@@ -2,11 +2,15 @@ The code and scripts used in "Molecular dynamics simulations of intrinsically di
 For reproducing the study's results and figures, you may follow the steps outlined below.
 
 ## Data pre-processing
-1. The data pre-processing folder allows processing of DMS labels, the dbNSFP database to extract GERP RS scores, and other minor tasks. 
-2. Most of the data work is done using process_proteome_information.py which merges labels with conservation information, alphamissense scores, and ESM1b scores.
-3. To create the feature tables, use create_feature_table_clinical.py for the Clinvar, PrimateAI, and other labels in IDRs. For Deep mutational scans, use create_feature_table_DMS.py. create_feature_table_GPCRmd.py was used to extract basic dynamics features as a positive control.
-4. feature_extraction_MSA.py uses Zoonomia MSAs to extract features such as entropy, compositional bias, and charge pattern.
-5. utils.py has the function to extract information from the MD simulations into a feature table for training.
+1. The data pre-processing folder allows processing of DMS labels by extracting labels from ProteinGym files of assays. It requires a DMS_metadata file that can be found on our Zenodo.
+2. You may also process the dbNSFP database to extract GERP RS scores, and other minor tasks. dbNSFP can be found at this [link](https://www.dbnsfp.org/)
+3. You may also need to process the LLR scores from ESM1b that is given for each isoform separately.
+
+## Data processing
+1. Most of the data work is done using process_proteome_information.py which merges labels with conservation information, alphamissense scores, and ESM1b scores.
+2. To create the feature tables, use create_feature_table_clinical.py for the Clinvar, PrimateAI, and other labels in IDRs. For Deep mutational scans, use create_feature_table_DMS.py. create_feature_table_GPCRmd.py was used to extract basic dynamics features as a positive control.
+3. feature_extraction_MSA.py uses Zoonomia MSAs to extract features such as entropy, compositional bias, and charge pattern.
+4. Note that utils.py (in the code root directory) has the function to extract information from the MD simulations into a feature table for training.
 
 ## Model training and testing/evaluation
 1. train_MDmis_RF.py is used for the training tasks.
@@ -25,6 +29,7 @@ For reproducing the study's results and figures, you may follow the steps outlin
 2. To convert coarse-grained MD simulations to all-atom trajectories and the MD features, you may use convert_CALVADOS_AA.py which performs both tasks.
   a. It does so by using convert_cg2all.sh and run_GetContacts.sh
   b. It also performs process_md_trajectory.py and compute_conformational_properties.py
+**An important note about convert_cg2all.sh and run_GetContacts.sh. The directories in th bash scripts need to be added based on your conda environments (if using) and the GetContacts cloned GitHub [repository](https://github.com/getcontacts/getcontacts.git)**
 3. Using this code by invoking single missense variants is done by run_CALVADOS_mutations_batches.py, which takes arguments to run batches of mutations.
 4. To compute differences between single missense variants and their wild-type MD simulations, use analyze_CALVADOS_mutations.py, and then plot_CALVADOS_differences from the Plotting and Analysis folder can help visualize differences.
 

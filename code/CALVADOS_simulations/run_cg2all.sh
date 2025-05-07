@@ -1,5 +1,5 @@
 #!/bin/bash
-source /home/az2798/miniconda3/bin/activate cg2all
+source /path/to/miniconda/bin/activate cg2all
 
 #
 topology="$1"
