@@ -29,13 +29,13 @@ Prerequisites: Processed proteome information dataframe can be found on our Zeno
 3. plot_variant_features.py generates majority of the figures for the manuscript.
 
 ## 4. Simulations of mutated sequences and plotting/analysis
-Prerequisites: The feature table (preferably split into folds and merged with MSA features) and the CALVADOS GitHub [repository](https://github.com/KULL-Centre/CALVADOS.git) cloned.
+Prerequisites: The feature table (preferably split into folds and merged with MSA features), the CALVADOS GitHub [repository](https://github.com/KULL-Centre/CALVADOS.git) cloned, and the residues.csv file found in this repository.
 
 1. Running MD simulations using CALVADOS2 was done using code from their repository. It is provided in the folder titled CALVADOS_code.
 2. To convert coarse-grained MD simulations to all-atom trajectories and the MD features, you may use convert_CALVADOS_AA.py which performs both tasks.
   a. It does so by using convert_cg2all.sh and run_GetContacts.sh
   b. It also performs process_md_trajectory.py and compute_conformational_properties.py
-**An important note about convert_cg2all.sh and run_GetContacts.sh. The directories in th bash scripts need to be added based on your conda environments (if using) and the GetContacts cloned GitHub [repository](https://github.com/getcontacts/getcontacts.git)**
+**An important note about convert_cg2all.sh and run_GetContacts.sh. The directories in the bash scripts need to be added based on your conda environments (if using) and the GetContacts cloned GitHub [repository](https://github.com/getcontacts/getcontacts.git)**
 3. Using this code by invoking single missense variants is done by run_CALVADOS_mutations_batches.py, which takes arguments to run batches of mutations.
 4. To compute differences between single missense variants and their wild-type MD simulations, use analyze_CALVADOS_mutations.py, and then plot_CALVADOS_differences from the Plotting and Analysis folder can help visualize differences.
 
