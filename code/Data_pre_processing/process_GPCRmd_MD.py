@@ -10,6 +10,11 @@ from Bio.Seq import Seq
 from utils import *
 import h5py
 
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 
 pd.set_option('display.max_columns', 500)
 
@@ -111,9 +116,8 @@ def align_and_update_metadata(metadata_row, uniprot_sequences, min_match_length=
 
 
 def main():
-    results_dir = "/home/az2798/MDmis/results/"
-    vault_dir = "/share/vault/Users/az2798/"
-    data_dir = "/home/az2798/MDmis/data/"
+    vault_dir = os.path.abspath(config["vault_dir"])
+    data_dir = os.path.abspath(config["data_dir"])
 
     clinvar_labels_df = pd.read_csv(os.path.join(vault_dir, "ClinVar_Data", "training.csv")) 
     MD_metadata = pd.read_csv(os.path.join(data_dir, "MD_metadata.csv"),

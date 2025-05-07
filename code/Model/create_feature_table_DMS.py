@@ -1,16 +1,17 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import gridspec
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
-import glob
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
 
-results_dir = "/home/az2798/MDmis/results/"
-vault_dir = "/share/vault/Users/az2798/"
-data_dir = "/home/az2798/MDmis/data/"
+results_dir = os.path.abspath(config["results_dir"])
+vault_dir = os.path.abspath(config["vault_dir"])
+data_dir = os.path.abspath(config["data_dir"])
 
 DMS_labels_df = pd.read_csv(os.path.join(vault_dir, "DMS_Data", "DMS_labels.csv")) 
 MD_metadata = pd.read_csv(os.path.join(data_dir, "MD_metadata.csv"),
@@ -21,7 +22,6 @@ MD_metadata.rename(columns={"source": "MD Data Source"}, inplace=True)
 IDRome_metadata = MD_metadata[MD_metadata["MD Data Source"] == "IDRome"]
 
 print(DMS_labels_df["UniProtID"].nunique())
-
 
 
 
@@ -50,16 +50,11 @@ print(subset_mapped_proteins.head())
 print(subset_mapped_proteins["protein_start_end"].unique())
 
 ###
-#Creating a damage score (as a rank)
 
-# subset_mapped_proteins["Normalized_Damage_Rank"] = (
-#     subset_mapped_proteins.groupby("UniProtID")["DMS_score"]
-#     .transform(lambda x: x.mul(-1).rank() / len(x))
-# )
 
 ### Now creating a feature table with MD data
 # Remove non-IDRs and HGMD labels
-h5py_path = "/share/vault/Users/az2798/train_data_all/filtered_feature_all_ATLAS_GPCRmd_IDRome.h5"
+h5py_path = os.path.abspath(config["h5py_path"])
 
 aa_order = "ARNDCQEGHILKMFPSTWYV"
 aaindex_res_mat = np.load(os.path.join(data_dir, "aa_index1.npy"))
@@ -84,13 +79,6 @@ location_column_name = "Location"
 original_aa_column_name = "Original_AA"
 changed_aa_column_name = "Changed_Residue" 
 outcome_column_name = "DMS_z_score"
-
-# ESM_dir = "/share/vault/Users/gz2294/Data/DMS/ClinVar.HGMD.PrimateAI.syn/esm2.650M.embedding.uniprotIDs/"
-# ESM_data = {}
-
-# for file in glob.glob(os.path.join(ESM_dir, "*representations*")):
-#     uniprot_ID = os.path.basename(file).split(".")[0]
-#     ESM_data[uniprot_ID] = np.load(file)
 
 entire_feature_table = create_feature_table(IDRome_labels, res_data, pair_data,
                                         aaindex_res_mat,

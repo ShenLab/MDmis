@@ -1,5 +1,4 @@
 # coding=utf-8
-# nohup python ~/ProDance/code/py_file/ATLAS_features.py -n 0 &
 import math
 import random
 import sys
@@ -9,7 +8,6 @@ import mdtraj
 import numpy as np
 import pandas as pd
 from Bio import SeqIO
-from scipy import constants
 from scipy.optimize import curve_fit
 
 warnings.filterwarnings("ignore")
@@ -298,7 +296,7 @@ def process_md_data(
 
 def main():
     #example run
-    MD_dir = "/home/az2798/MDmis/code/Q99457_1_97/cg_to_all/"
+    MD_dir = "/path/to/MD" # change as needed for testing
     process_md_data(
         f"{MD_dir}aa_traj.dcd",
         f"{MD_dir}aa_traj.pdb",

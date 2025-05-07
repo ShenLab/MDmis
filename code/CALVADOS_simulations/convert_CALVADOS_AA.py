@@ -1,12 +1,15 @@
 import subprocess
 import os
-import re
 import warnings
-import time
-import argparse
+
 import shutil
 import glob
 import pandas as pd
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
 from process_md_trajectory import *
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -45,27 +48,22 @@ def convert_cg_to_aa(CG_topology_filename, CG_trajectory_filename,
     return False
     
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
+    data_dir = os.path.abspath(config["data_dir"])
     residues_masses = pd.read_csv(os.path.join(
         data_dir, "residues_masses.csv"
     ), index_col=0)
-    cg2all_script = "/home/az2798/MDmis/code/run_cg2all.sh"
-    getcontacts_script = "/home/az2798/MDmis/code/run_GetContacts.sh"
+    cg2all_script = "run_cg2all.sh" #should be in same folder
+    getcontacts_script = "run_GetContacts.sh"
     
     
-    output_directory = "/nfs/user/Users/az2798/processed_CALVADOS/Benign/" #
-    CALVADOS_runs_directory = "/nfs/user/Users/az2798/CALVADOS_runs/Benign/"
+    output_directory = os.path.abspath(config["CALVADOS_processed_dir"]) #This needs to be specific to each mutation type
+    CALVADOS_runs_directory = os.path.abspath(config["CALVADOS_raw_dir"])
     
-    # output_directory = "/nfs/user/Users/az2798/processed_CALVADOS/Pathogenic_High_RMSF/"
-    # CALVADOS_runs_directory = "/nfs/user/Users/az2798/CALVADOS_runs/Pathogenic_High_RMSF_ld2/"
-    
-    # output_directory = "/nfs/user/Users/az2798/processed_CALVADOS/Pathogenic_Low_RMSF/"
-    # CALVADOS_runs_directory = "/nfs/user/Users/az2798/CALVADOS_runs/Pathogenic_Low_RMSF/"
-
+  
     for folder in glob.glob(os.path.join(CALVADOS_runs_directory, "*")):
         mutation_name = os.path.basename(folder)
         print(mutation_name)
-        if mutation_name == "Q86UQ4_2597_3287_F:2799:L": 
+        if mutation_name == "Q86UQ4_2597_3287_F:2799:L": #Skip for Benign!
             continue
         already_processed = convert_cg_to_aa(os.path.join(folder, "top.pdb"),
                          os.path.join(folder, "traj.dcd"),
@@ -86,28 +84,7 @@ def main():
                         residues_masses,
                         os.path.join(output_directory, mutation_name, 'conformational_properties.npy'),
                             0.02, 800)
-    
 
-    
-
-    # output_directory = "/nfs/user/Users/az2798/processed_CALVADOS/Shorter_simulations/"
-    # CALVADOS_runs_directory = "/nfs/user/Users/az2798/CALVADOS_runs/Shorter_simulations/"
-    # for folder in glob.glob(os.path.join(CALVADOS_runs_directory, "*")):
-    #     simulation_name = os.path.basename(folder)
-    #     print(simulation_name)
-
-    #     # convert_cg_to_aa(os.path.join(folder, "top.pdb"),
-    #     #                  os.path.join(folder, "traj.dcd"),
-    #     #                  simulation_name, 
-    #     #                  cg2all_script,
-    #     #                  getcontacts_script,
-    #     #                  output_directory)
-    #     process_md_data(os.path.join(output_directory, simulation_name, 'aa_traj.dcd'),
-    #                 os.path.join(output_directory, simulation_name, 'aa_top.pdb'),
-    #                 os.path.join(output_directory, simulation_name, 'contacts.tsv'),
-    #                 os.path.join(output_directory, simulation_name, 'res_feature.npy'),
-    #                 os.path.join(output_directory, simulation_name, 'pair_feature.npy'),
-    #                  0.02, 1000)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import cProfile
 import math
 import os
 import pandas as pd
-import h5py
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
@@ -14,18 +13,23 @@ from sklearn.inspection import permutation_importance
 
 import warnings
 
+warnings.filterwarnings("ignore")
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
 from predict_MDmis import *
+from evaluate_MDmis import *
+    
+
 pd.set_option("display.max_columns", 100)
 pd.set_option("display.max_rows", 100)
-warnings.filterwarnings("ignore")
-
-
-    
 def main():
-    models_dir = "/home/az2798/MDmis/models/"
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/"
+    models_dir = os.path.abspath(config["models_dir"])
+    data_dir = os.path.abspath(config["data_dir"]) 
+    results_dir = os.path.abspath(config["results_dir"])
 
     val_tables = []
     for fold in range(1,6):
@@ -58,8 +62,6 @@ def main():
                           right_on=["UniProtID", location_column_name, "changed_aa_amis"],
                           how="left", suffixes=('', '_y')).drop(["LLR_y"], axis = 1)
     
-    # variant_information_columns = ["outcome", "UniProtID", "location", "Original AA", 
-    #                            "Changed AA"]
 
 
     ## Complete merged data with proteome information and MD features 
@@ -153,15 +155,6 @@ def main():
              use_ESM1b=False, use_length = True)
         
 
-        # ESM1b_RF = pickle.load(
-        #     open(os.path.join(models_dir,
-        #                        f"fold_{fold}",
-        #                        "MDmis_RF_ESM1b"), "rb")
-        # )
-        # IDRs_table.loc[IDRs_table["Fold"] == fold, "ESM1b_only"] = predict_MDmis(
-        #     ESM1b_RF, IDRs_table[IDRs_table["Fold"] == fold], use_AA_index = False, use_res_md= False,
-        #      use_pair_md= False, use_Cons =False, use_ESM_embed= False, use_conf_prop = False,
-        #      use_ESM1b=True, use_length = False)
     
     #print(IDRs_table.head)
     IDRs_table.dropna(subset = ["am_pathogenicity", "GERP++_RS"], axis = 0,

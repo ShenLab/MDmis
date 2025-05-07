@@ -6,11 +6,17 @@ import os
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
 from utils import *
-import glob
 
-results_dir = "/home/az2798/MDmis/results/"
-vault_dir = "/share/vault/Users/az2798/"
-data_dir = "/home/az2798/MDmis/data/"
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
+
+results_dir = os.path.abspath(config["results_dir"])
+vault_dir = os.path.abspath(config["vault_dir"])
+data_dir = os.path.abspath(config["data_dir"])
 
 clinvar_labels_df = pd.read_csv(os.path.join(vault_dir, "ClinVar_Data", "training.csv")) 
 MD_metadata = pd.read_csv(os.path.join(data_dir, "MD_metadata.csv"),
@@ -52,10 +58,8 @@ subset_mapped_proteins = subset_mapped_proteins[subset_mapped_proteins["location
 
 print(subset_mapped_proteins.shape)
 ### Now creating a feature table with MD data
-# Remove non-IDRs and HGMD labels
 
-
-h5py_path = "/share/vault/Users/az2798/train_data_all/filtered_feature_all_ATLAS_GPCRmd_IDRome.h5"
+h5py_path = os.path.abspath(config["h5py_path"])
 
 aa_order = "ARNDCQEGHILKMFPSTWYV"
 aaindex_res_mat = np.load(os.path.join(data_dir, "aa_index1.npy"))
@@ -73,16 +77,6 @@ unique_proteins_df = pd.DataFrame(unique_proteins, columns=["UniProtID"])
 
 ####
 print(IDRome_labels[["outcome", "Label Source"]].value_counts())
-
-# # train_proteins, val_proteins = train_test_split(unique_proteins_df, test_size=0.2, random_state=42)
-# ESM_dir = "/share/vault/Users/gz2294/Data/DMS/ClinVar.HGMD.PrimateAI.syn/esm2.650M.embedding.uniprotIDs/"
-# ESM_data = {}
-
-# for file in glob.glob(os.path.join(ESM_dir, "*representations*")):
-#     uniprot_ID = os.path.basename(file).split(".")[0]
-#     ESM_data[uniprot_ID] = np.load(file)
-
-# print(len(ESM_data.keys()), "Number of embeddings")
 
 
 

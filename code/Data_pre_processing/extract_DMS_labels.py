@@ -9,8 +9,10 @@ import scipy.stats as ss
 
 import glob
 import sys
-sys.path.append('/home/az2798/MDmis/code/')
-
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 
 from utils import *
 from process_proteome_information import *
@@ -71,9 +73,9 @@ def create_DMS_table(DMS_metadata, DMS_dir):
     return combined_DMS_table
 
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
-    vault_dir = "/share/vault/Users/az2798/"
-    results_dir = "/home/az2798/MDmis/results/"
+    data_dir = os.path.abspath(config["data_dir"])
+    vault_dir = os.path.abspath(config["vault_dir"])
+    results_dir = os.path.abspath(config["results_dir"])
     DMS_metadata = pd.read_csv(
         os.path.join(data_dir, "DMS_metadata.txt"), sep= r'\s+'
     )
@@ -132,45 +134,5 @@ def main():
     )
     plt.clf()
 
-    # ### Load the GERP data
-
-    # GERP_df = pd.read_csv(os.path.join(
-    #     vault_dir, "dbNSFP_data", "dbNSFP4_merged.csv"
-    #     ), index_col=0, header=0)
-    # GERP_columns_to_split = ['aapos', 'Ensembl_transcriptid', 'Uniprot_acc']
-    # GERP_char_to_split = ";"
-
-    # ### Load Amis Table
-    # alpha_missense_table = pd.read_csv(os.path.join(data_dir,
-    #                             "AlphaMissense_data", "AlphaMissense_aa_substitutions.tsv"),
-    #                             sep='\t', low_memory=False, skiprows=[0,1,2])
-    # ###
-    # pLDDT_df = pd.read_csv(os.path.join(data_dir, 
-    #                                         "pLDDT_scores", 
-    #                                         "processed_pLDDT_scores.csv"), 
-    #                             index_col=0, low_memory=False)
-    
-    # ### Preprocess and concatenate MSA coevolution features
-    # list_of_MSA_feature_paths = glob.glob(os.path.join(data_dir, 
-    #     "MSA_coevolution_features_MI",
-    #     "MSA_coevolution_features_*"))
-    # list_of_MSA_feature_dfs = [pd.read_csv(path, index_col = 0) for path in list_of_MSA_feature_paths]
-
-    # MSA_feature_table_combined = pd.concat(list_of_MSA_feature_dfs, axis = 0)
-    # MSA_feature_table_combined.rename({"ENST_id.1": "Gene_id"}, axis=1, inplace=True)
-    # MSA_feature_table_combined = MSA_feature_table_combined[MSA_feature_table_combined["Location_Sequence"]!= "-"] #removing gaps
-    # MSA_feature_table_combined["Location_Sequence"] = MSA_feature_table_combined["Location_Sequence"].astype(int)
-    # ###
-
-    # merged_proteome_table_DMS = preprocess_proteome_information(DMS_labels_df, 
-    #                                 "Location", "Changed_Residue",
-    #                                 GERP_df, GERP_columns_to_split, GERP_char_to_split,
-    #                                 alpha_missense_table, ESM pLDDT_df,
-    #                                 MSA_feature_table_combined
-    #                                 )
-    
-
-    # merged_proteome_table_DMS.to_csv(os.path.join(data_dir,
-    #     "merged_proteome_information_DMS.csv"))
 if __name__ == "__main__":
     main()

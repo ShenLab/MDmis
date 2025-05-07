@@ -5,7 +5,11 @@ import pandas as pd
 import scipy.stats as ss
 
 
-
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 def calculate_percent_overlap(row):
     """
     Calculates the percentage of overlap between the two domains.
@@ -36,11 +40,9 @@ def calculate_percent_overlap(row):
 
 def main():
     ## Preliminary data loading and processing
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/clinical_figures"
-    vault_dir = "/share/vault/Users/az2798/"
+    data_dir = os.path.abspath(config["data_dir"])
+    vault_dir = os.path.abspath(config["vault_dir"])
 
-    RMSF_column_name = "Res_MD_3"
     IDRs_table = pd.read_csv(
         os.path.join(
             data_dir, "clinical_train_val", "feature_table.csv"
@@ -56,7 +58,6 @@ def main():
 
     IDRs_table["Variant Effect"] = np.where(IDRs_table["outcome"] == 1, "Pathogenic", "Benign")
 
-    IDRs_table = IDRs_table[IDRs_table[RMSF_column_name] <20]
     IDRs_table['Length Category'] = np.select(
         [
             (IDRs_table["Variant Effect"] == "Pathogenic") & 
@@ -68,64 +69,43 @@ def main():
         ['Pathogenic - Long IDRs', 'Pathogenic - Short IDRs', 'Benign']
     )
     
-    curated = True
     ###### PTM database merging
-    # CURATED DATABASE
-    if curated:
-        PTM_dataframes = []
-        ptm_column_names = ["UniProt_ID", "Location", "PTM_Type"]
 
-        for filename in os.listdir(os.path.join(vault_dir, "PTM_data")):
-            file_path = os.path.join(vault_dir, "PTM_data", filename)
-            extracted_rows = []
-            with open(file_path, 'r') as f:
-                lines = f.readlines()[2:]  #Skip the header line
-            for line in lines:
-                parts = line.strip().split()
-                if "_" in parts[0]:
-                    #This implies that the first column is Gene_Name
-                    extracted_rows.append(parts[1:4])
-                elif re.match("^[a-zA-Z]+.*", parts[0]):
-                    #This implies that the first column is UniProtID
-                    extracted_rows.append(parts[0:3])
-                else:
-                    continue
-            df = pd.DataFrame(extracted_rows, columns=ptm_column_names)
-            df["UniProt_ID"] = df["UniProt_ID"].str.split('-').str[0]
-            PTM_dataframes.append(df)
+    PTM_dataframes = []
+    ptm_column_names = ["UniProt_ID", "Location", "PTM_Type"]
 
-        #PTM_combined_df = pd.DataFrame(PTM_dataframes, columns = ptm_column_names)
-        PTM_combined_df = pd.concat(PTM_dataframes, ignore_index=True)
-        print(PTM_combined_df.head())
+    for filename in os.listdir(os.path.join(vault_dir, "PTM_data")):
+        file_path = os.path.join(vault_dir, "PTM_data", filename)
+        extracted_rows = []
+        with open(file_path, 'r') as f:
+            lines = f.readlines()[2:]  #Skip the header line
+        for line in lines:
+            parts = line.strip().split()
+            if "_" in parts[0]:
+                #This implies that the first column is Gene_Name
+                extracted_rows.append(parts[1:4])
+            elif re.match("^[a-zA-Z]+.*", parts[0]):
+                #This implies that the first column is UniProtID
+                extracted_rows.append(parts[0:3])
+            else:
+                continue
+        df = pd.DataFrame(extracted_rows, columns=ptm_column_names)
+        df["UniProt_ID"] = df["UniProt_ID"].str.split('-').str[0]
+        PTM_dataframes.append(df)
 
-        PTM_combined_df["Location"] = PTM_combined_df["Location"].astype(int)
-        PTM_combined_df.drop_duplicates(inplace=True)
-        PTM_merged = pd.merge(left = IDRs_table,
-                          right = PTM_combined_df,
-                          left_on=["UniProtID", "location"],
-                          right_on=["UniProt_ID", "Location"],
-                          how="left",
-                          suffixes= ["", "_y"])
+    #PTM_combined_df = pd.DataFrame(PTM_dataframes, columns = ptm_column_names)
+    PTM_combined_df = pd.concat(PTM_dataframes, ignore_index=True)
+    print(PTM_combined_df.head())
 
+    PTM_combined_df["Location"] = PTM_combined_df["Location"].astype(int)
+    PTM_combined_df.drop_duplicates(inplace=True)
+    PTM_merged = pd.merge(left = IDRs_table,
+                        right = PTM_combined_df,
+                        left_on=["UniProtID", "location"],
+                        right_on=["UniProt_ID", "Location"],
+                        how="left",
+                        suffixes= ["", "_y"])
 
-
-    #USE PREDICTIONS
-    else:
-        PTM_pred_df = pd.read_csv("/home/ch3849/tool_code/MIND/temp/correct_predictions.csv")
-        PTM_pred_df = PTM_pred_df[PTM_pred_df["pred_score"]> 0.5]
-        PTM_merged = pd.merge(left = IDRs_table,
-                          right = PTM_pred_df,
-                          left_on=["UniProtID", "location"],
-                          right_on=["uid", "site"],
-                          how="left",
-                          suffixes= ["", "_y"])
-        PTM_merged.rename(columns={"PTM_type": "PTM_Type"}, inplace=True)
-    #print(PTM_combined_df[["UniProt_ID", "Location"]].value_counts())
-    
-    #PTM_combined_df.drop_duplicates(subset=["UniProt_ID", "Location"], inplace=True)
-
-    
-    
     print(PTM_merged.shape)
 
 
@@ -133,17 +113,10 @@ def main():
     PTM_merged["PTM"] = np.where(PTM_merged["PTM_Type"] =="None", "No", "Yes")
     
 
-    PTM_merged[(PTM_merged["PTM_Type"] == "Phosphorylation") &
-                            (PTM_merged["Length Category"] == "Pathogenic - Short IDRs")][["UniProtID", 
-                                                                                          "location","protein_start_end", "PTM_Type", "Original AA",
-                                                                                          "Changed AA"]].to_csv(os.path.join(data_dir, "phosphorylation_sites_IDRs.csv"))
-    
-    #.drop_duplicates(subset = ["UniProtID", "start", "end", "location"])
-
-    
-
-
-    
+    # PTM_merged[(PTM_merged["PTM_Type"] == "Phosphorylation") &
+    #                         (PTM_merged["Length Category"] == "Pathogenic - Short IDRs")][["UniProtID", 
+    #                                                                                       "location","protein_start_end", "PTM_Type", "Original AA",
+    #                                                                                       "Changed AA"]].to_csv(os.path.join(data_dir, "phosphorylation_sites_IDRs.csv"))
     contingency_table = pd.crosstab(PTM_merged['PTM'], PTM_merged['Length Category'])
     print(contingency_table)
     print(ss.chi2_contingency(contingency_table))

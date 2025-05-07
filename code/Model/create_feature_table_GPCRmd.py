@@ -1,16 +1,14 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import gridspec
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split
 from utils import *
-
-results_dir = "/home/az2798/MDmis/results/"
-vault_dir = "/share/vault/Users/az2798/"
-data_dir = "/home/az2798/MDmis/data/"
-
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
 
 
 
@@ -139,6 +137,8 @@ def create_feature_table_GPCRmd(df_table, res_data, pair_data, aa_res_matrix,
     return feature_table
 
 def main():
+    vault_dir = os.path.abspath(config["vault_dir"])
+    data_dir = os.path.abspath(config["data_dir"])
     clinvar_labels_df = pd.read_csv(os.path.join(vault_dir, "ClinVar_Data", "training.csv")) 
     GPCRmd_metadata = pd.read_csv(os.path.join(data_dir, "GPCRmd_metadata_processed.csv"),
                                         index_col=0)
@@ -173,7 +173,7 @@ def main():
 
     ### Now creating a feature table with MD data
     # Remove non-IDRs and HGMD labels
-    h5py_path = "/share/vault/Users/az2798/train_data_all/filtered_feature_all_ATLAS_GPCRmd_IDRome.h5"
+    h5py_path = os.path.abspath(config["h5py_path"])
 
     aa_order = "ARNDCQEGHILKMFPSTWYV"
     aaindex_res_mat = np.load(os.path.join(data_dir, "aa_index1.npy"))

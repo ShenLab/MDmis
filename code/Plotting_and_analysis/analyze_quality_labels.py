@@ -3,18 +3,18 @@ import os
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
-
-
-
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 
 def main():
     pd.set_option("display.max_columns", 100)
     ## Preliminary data loading and processing
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/clinical_figures"
-    vault_dir = "/share/vault/Users/az2798/"
+    data_dir = os.path.abspath(config["data_dir"])
+    vault_dir = os.path.abspath(config["vault_dir"])
 
-    RMSF_column_name = "Res_MD_3_pos_0"
     IDRs_table = pd.read_csv(
         os.path.join(
             data_dir, "clinical_train_val", "feature_table.csv"
@@ -30,7 +30,6 @@ def main():
 
     IDRs_table["Variant Effect"] = np.where(IDRs_table["outcome"] == 1, "Pathogenic", "Benign")
 
-    IDRs_table = IDRs_table[IDRs_table[RMSF_column_name] <20]
     IDRs_table['Length Category'] = np.select(
         [
             (IDRs_table["Variant Effect"] == "Pathogenic") & 

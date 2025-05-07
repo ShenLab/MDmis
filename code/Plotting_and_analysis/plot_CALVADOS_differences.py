@@ -1,37 +1,32 @@
-import subprocess
 import os
-import re
 import warnings
-import time
-import argparse
-import shutil
-import glob
-
 import numpy as np
 import pandas as pd
-
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append('/home/az2798/MDmis/code/')
 
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
+from utils import *
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-
-
-
-
 def main():
-    
-    mutation_differences_df = pd.read_csv(
-        "/home/az2798/MDmis/data/calvados_mutation_differences.csv", index_col=0
+    data_dir = os.path.abspath(config["data_dir"])
+    results_dir = os.path.join(os.path.abspath(config["results_dir"]), "CALVADOS_figures")
+
+    mutation_differences_df = pd.read_csv(os.path.join(
+        data_dir,"calvados_mutation_differences.csv")
+        , index_col=0
     )
     print(mutation_differences_df["Mutation_Category"].value_counts())
     length_palette = {"Pathogenic - Long IDRs": "#e81a1a", "Pathogenic - Short IDRs": "#f5ed11",
                       "Benign": "#3497ed"}
-    results_dir = "/home/az2798/MDmis/results/CALVADOS_figures/"
     significance_levels = {0.0001: '***', 0.001: '**', 0.05: '*'}
     
     # plot_boxplot_with_significance(
@@ -187,49 +182,7 @@ def main():
     )
     plt.clf()
     
-    # plot_boxplot_with_significance(
-    #     mutation_differences_df,
-    #     "Mutation_Category",
-    #     "Res_All_MD_Diff_1",
-    #     results_dir, "Res_All_MD_Diff_1.png",
-    #     significance_levels,
-    #     title='', xlabel='Length Category', ylabel='Average Difference in SASA',
-    #     plot_type = "violin", palette = length_palette
-    # )
-    # plt.clf()
-
-    # plot_boxplot_with_significance(
-    #     mutation_differences_df,
-    #     "Mutation_Category",
-    #     "Res_All_MD_Diff_19",
-    #     results_dir, "Res_All_MD_Diff_19.png",
-    #     significance_levels,
-    #     title='', xlabel='Length Category', ylabel='Average Difference in Chi Angle (8th)',
-    #     plot_type = "violin", bar_height = 0.05, palette = length_palette
-    # )
-    # plt.clf()
-
-    # plot_boxplot_with_significance(
-    #     mutation_differences_df,
-    #     "Mutation_Category",
-    #     "Res_All_MD_Diff_35",
-    #     results_dir, "Res_All_MD_Diff_35.png",
-    #     significance_levels,
-    #     title='', xlabel='Length Category', ylabel='Average Difference in Phi Angle (12th)',
-    #     plot_type = "violin", bar_height = 0.01, palette = length_palette
-    # )
-    # plt.clf()
-
-    # plot_boxplot_with_significance(
-    #     mutation_differences_df,
-    #     "Mutation_Category",
-    #     "Res_Euclid",
-    #     results_dir, "Res_Euclid.png",
-    #     significance_levels,
-    #     title='', xlabel='Length Category', ylabel='Residue Euclidean Distance',
-    #     plot_type = "violin"
-    # )
-    # plt.clf()
+    
 
     plot_boxplot_with_significance(
         mutation_differences_df,
@@ -253,16 +206,7 @@ def main():
     )
     plt.clf()
 
-    # plot_boxplot_with_significance(
-    #     mutation_differences_df,
-    #     "Mutation_Category",
-    #     "nu_Difference",
-    #     results_dir, "nu_Diff.png",
-    #     significance_levels,
-    #     title='', xlabel='Length Category', ylabel='Difference in Nu',
-    #     plot_type = "violin", palette = length_palette
-    # )
-    # plt.clf()
+    
 
     plot_ridgeplot(
         data=mutation_differences_df,

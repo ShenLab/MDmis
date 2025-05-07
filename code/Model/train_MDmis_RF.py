@@ -1,5 +1,4 @@
-import cProfile
-import math
+
 import os
 import pandas as pd
 import h5py
@@ -7,16 +6,15 @@ import numpy as np
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-import xgboost as xgb 
-from sklearn.linear_model import ElasticNetCV
 import pickle
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.inspection import permutation_importance
 from joblib import Parallel, delayed
-from imblearn.under_sampling import RandomUnderSampler
-
+import pathlib
+import sys
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
 
 
 def train_MDmis_RF(train_feature_table, outcome_column_name,
@@ -76,77 +74,6 @@ def train_MDmis_RF(train_feature_table, outcome_column_name,
 
             with open(model_path, "wb") as f:
                 pickle.dump(MDmis_RF, f)
-
-
-
-def train_MDmis_XGB(train_feature_table, variant_information_columns, outcome_column_name,
-                    use_res_md=True, use_pair_md=True, store_model=True,
-                    models_directory=None, model_suffix=None, fold=None):
-    """
-    Trains an XGBoost classifier for predicting pathogenicity based on MD features and stores the trained model.
-
-    Parameters:
-    ----------
-    train_feature_table : pandas.DataFrame
-        The training data containing features and outcomes.
-        
-    variant_information_columns : list
-        List of columns to exclude from training features (e.g., variant-specific info).
-
-    outcome_column_name : str
-        The name of the column containing binary outcomes.
-
-    use_res_md : bool, optional
-        Whether to include residue-level MD features. Default is True.
-
-    use_pair_md : bool, optional
-        Whether to include pairwise MD features. Default is True.
-
-    store_model : bool, optional
-        Whether to save the trained model to a file. Default is True.
-
-    models_directory : str, optional
-        Directory to store the model if `store_model` is True.
-
-    model_suffix : str, optional
-        Suffix for the saved model filename.
-
-    fold : int, optional
-        Fold number for cross-validation.
-
-    Returns:
-    --------
-    None
-        Trains and optionally saves the model.
-    """
-    if not use_res_md:
-        train_feature_table = train_feature_table.loc[:, ~train_feature_table.columns.str.contains('Res_MD')]
-    if not use_pair_md:
-        train_feature_table = train_feature_table.loc[:, ~train_feature_table.columns.str.contains('Pair_MD')]
-
-    X_train = train_feature_table.drop(columns=variant_information_columns)
-    y_train = train_feature_table[outcome_column_name].astype(int)
-
-    MDmis_XGB = xgb.XGBClassifier(
-        objective="binary:logistic",  
-        eval_metric="logloss",       
-        use_label_encoder=False,     
-        random_state=42             
-    )
-
-    MDmis_XGB.fit(X_train, y_train)
-
-    if store_model:
-        if model_suffix is None or models_directory is None:
-            raise ValueError("Model suffix and directory cannot be None.")
-        else:
-            model_path = os.path.join(models_directory,
-                                      f"fold_{fold}",
-                                      f"MDmis_XGB_{model_suffix}")
-            os.makedirs(os.path.join(models_directory, f"fold_{fold}"), exist_ok=True)
-
-            with open(model_path, "wb") as f:
-                pickle.dump(MDmis_XGB, f)
     
 
 def train_MDmis_regression(train_feature_table, variant_information_columns, outcome_column_name,
@@ -343,9 +270,9 @@ def train_one_fold(data_dir, models_dir,
     
 
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
-    models_dir = "/home/az2798/MDmis/models/"
-    vault_dir = "/nfs/user/Users/az2798/"
+    data_dir = os.path.abspath(config["data_dir"])
+    models_dir = os.path.abspath(config["models_dir"])
+    vault_dir = os.path.abspath(config["vault_dir"])
 
     entire_feature_table = pd.read_csv(
         os.path.join(data_dir, "clinical_train_val", "feature_table.csv"
@@ -353,8 +280,6 @@ def main():
     )
     entire_feature_table = entire_feature_table[entire_feature_table["Label Source"]!= "HGMD"] # not used for training
 
-    # entire_feature_table = entire_feature_table[~((entire_feature_table["Label Source"]== "ClinVar") & 
-    #                                             (entire_feature_table["outcome"]==0))] # not used for training 
  
     print(entire_feature_table.head())
     sequence_composition_df = pd.read_csv(
@@ -410,7 +335,6 @@ def main():
 
     feature_table_with_ESM1b["Region Length"] = feature_table_with_ESM1b["end"] - feature_table_with_ESM1b["start"] + 1
 
-    # feature_table_with_LLR = feature_table_with_LLR[feature_table_with_LLR["Region Length"] <800]
     print("Feature Table for Splits", feature_table_with_ESM1b.shape)
 
     create_folds(feature_table_with_ESM1b, "UniProtID",

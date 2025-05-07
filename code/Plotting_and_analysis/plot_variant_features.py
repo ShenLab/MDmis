@@ -2,21 +2,18 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
-from matplotlib import gridspec
-from matplotlib.colors import ListedColormap
+
 import scipy.stats as ss
 import numpy as np
 import os
-import re
 import warnings
-from sklearn.linear_model import LinearRegression
 
 import sys
-
-sys.path.append('/home/az2798/MDmis/code/')
-
-
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
 from plotter_functions import *
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -28,24 +25,10 @@ pd.set_option('display.max_rows', None)
 
 
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/clinical_figures"
-    vault_dir = "/share/vault/Users/az2798/"
+    data_dir = os.path.abspath(config["data_dir"])
+    results_dir = os.path.join(os.path.abspath(config["results_dir"]), "clinical_figures") #recommend adding subdirectories to save specific figures
     
     
-    # train_feature_table = pd.read_csv(
-    #     os.path.join(data_dir, "clinical_train_val", "fold_1",
-    #                  "train.csv"), 
-    #     index_col = 0
-    # )
-    # val_feature_table = pd.read_csv(
-    #     os.path.join(data_dir, "clinical_train_val", "fold_1",
-    #                  "val.csv"), 
-    #     index_col = 0
-    # )
-
-    # IDR_MD_features = pd.concat([train_feature_table, val_feature_table],
-    #                             axis = 0)
     
     IDR_MD_features = pd.read_csv(
         os.path.join(
@@ -89,8 +72,7 @@ def main():
     other_regions_table["Variant Effect"] = np.where(other_regions_table[outcome_column_name] == 1, "Pathogenic", "Benign")
 
 
-    #site_evolution_column_name = "Site_Specific_Entropy"
-    #coevolution_column_name = "Max_MI"
+    
     sasa_column_name = "Res_MD_1_pos_0"
     RMSF_column_name = "Res_MD_3_pos_0"
     pLDDT_column_name = "pLDDT"
@@ -234,15 +216,6 @@ def main():
     print(IDRs_table_with_conf_prop.shape, "With conformation")
     
 
-    # plot_boxplot_with_significance(
-    #     data=IDRs_table_with_conf_prop,
-    #     group_col='RMSF Category',
-    #     value_col="Region Length",
-    #     results_dir=results_dir,
-    #     ylabel = "IDR Length",
-    #     plot_filename="IDR_Length_RMSF_category.png"
-    # )
-    # plt.clf()
 
     sns.regplot(data= IDRs_table_with_conf_prop, x="Region Length",
                     y = RMSF_column_name)
@@ -386,66 +359,6 @@ def main():
     plt.clf()
 
 
-
-    # plot_variant_by_feature(IDRs_table_with_conf_prop, 
-    #                         GERP_column_name,variant_palette, "ete", "End to End Distance",
-    #                         "ete_Variant.png",
-    #                results_dir)
-    
-    # plot_variant_by_feature(IDRs_table_with_conf_prop, 
-    #                         GERP_column_name,variant_palette, "nu", "Compaction (nu)",
-    #                         "nu_Variant.png",
-    #                results_dir)
-    # plot_variant_by_feature(IDRs_table_with_conf_prop, 
-    #                         GERP_column_name,variant_palette, "Rg", "Radius of Gyration",
-    #                         "Rg_Variant.png",
-    #                results_dir)
-    # plot_variant_by_feature(IDRs_table_with_conf_prop, 
-    #                         GERP_column_name,variant_palette, "Delta", "Asphericity",
-    #                         "Asphericity_Variant.png",
-    #                results_dir)
-
-    # sns.pairplot(
-    #     IDRs_table_with_conf_prop,
-    #     vars=["Region Length", RMSF_column_name,
-    #           "Rg", "ete", "nu", "Delta", "Pair_MD_2"],
-    #     kind="reg",
-    #     hue = "Length Category",
-    #     diag_kind="kde",
-    #     plot_kws={'scatter_kws': {'s': 10}}
-    # )
-    # plt.suptitle("IDRs", y=1.02)
-    # plt.savefig(os.path.join(results_dir, "conf_prop_regplot.png"), dpi=300, bbox_inches="tight")
-    # plt.clf()
-
-    # ax =sns.histplot(IDRs_table_with_conf_prop[IDRs_table_with_conf_prop["Length Category"] == "Benign"], 
-    #              x="nu", bins=30,
-    #              element="step", fill = False, stat="density", color= length_palette["Benign"], legend=False)
-    
-    # sns.histplot(IDRs_table_with_conf_prop[IDRs_table_with_conf_prop["Length Category"] != "Benign"], 
-    #              x="nu", bins=30, hue = "Length Category", palette=length_palette,
-    #              fill = False, stat="density", common_norm=False, ax=ax)
-    # plt.title("Length Adjusted Compaction (nu)", fontsize = 30)
-    # ax.tick_params(axis='both', labelsize=20)
-    # ax.set_xlabel('Compaction', fontsize=25)
-    # ax.set_ylabel('Density', fontsize=25)
-    # plt.tight_layout()
-    # plt.savefig(os.path.join(results_dir, "nu_histogram.png"), dpi=300, bbox_inches="tight")
-    
-    # plt.clf()
-
-
-    # ax =sns.histplot(IDRs_table_with_conf_prop, 
-    #              x="Region Length", bins=40)
-    # plt.title("Histogram of lengths for all variants", fontsize = 30)
-    # ax.tick_params(axis='both', labelsize=20)
-    # ax.set_xlabel('Region Length', fontsize=25)
-    # ax.set_ylabel('Number of Observations', fontsize=25)
-    # plt.tight_layout()
-    # plt.savefig(os.path.join(results_dir, "variants_length_histogram.png"), dpi=300, bbox_inches="tight")
-    
-    # plt.clf()
-
     print(IDRs_table_with_conf_prop.drop_duplicates("protein_start_end")["protein_start_end"].nunique(), "Unique IDRs")
     print(IDRs_table_with_conf_prop["UniProtID"].nunique(), "Unique proteins")
 
@@ -459,32 +372,8 @@ def main():
     plt.savefig(os.path.join(results_dir, "regions_length_histogram.png"), dpi=300, bbox_inches="tight")
     plt.clf()
 
-
-    # go_annotations_df = pd.read_csv(
-    #     os.path.join(vault_dir, "GO_annotation",
-    #                   "processed_go_annotations.csv"), index_col=0
-    # )
-    # go_annotations_df.drop_duplicates(subset = ["UniProtID", "Third_Parent"])
-    
-    # IDRs_GO = pd.merge(left = IDRs_table, right = go_annotations_df,
-    #          on = "UniProtID", how = "left")
-    # print(IDRs_GO.head())
-    # print(IDRs_GO.shape)
-    # IDRs_GO.dropna(inplace = True)
-    # print(IDRs_GO.shape)
-    # print(IDRs_GO["Third_Parent"].value_counts())
-
-    # plot_GO_terms(IDRs_GO, 
-    #               "Third_Parent",
-    #               20,
-    #               RMSF_column_name, 
-    #               4.5,
-    #               results_dir)
-
-
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/GPCRmd_figures/"
-    vault_dir = "/share/vault/Users/az2798/"
+    ## Switching to GPCRmd
+    results_dir = os.path.join(os.path.abspath(config["results_dir"]), "GPCR_figures")
     
     train_feature_table = pd.read_csv(
         os.path.join(data_dir, "GPCRmd_train_val", "train.csv"), 
@@ -503,11 +392,6 @@ def main():
         index_col = 0, low_memory= False
     )
 
-    #GPCRmd_metadata = pd.read_csv(
-    #    os.path.join(data_dir, "GPCRmd_metadata_processed.csv"),
-    #    index_col=0
-    #)
-    #IDRome_metadata = MD_metadata[MD_metadata["source"] == "IDRome"][["UniProtID", "protein_start_end"]]
     print(proteome_information["outcome"].value_counts())
 
     print(GPCRmd_features.shape)

@@ -1,10 +1,14 @@
 import pandas as pd
 import glob
 import os
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 
-
-vault_dir = "/nfs/user/Users/az2798/UniProt_tracks/"
-output_dir = "/home/az2798/MDmis/data/"
+vault_dir = os.path.join(os.path.abspath(config["vault_dir"]), "UniProt_tracks") #store the Uniprot tracks in a subdirectory
+output_dir = os.path.abspath(config["data_dir"])
 
 tracks_dataframes = []
 for tracks_file in glob.glob(os.path.join(vault_dir, "*")):

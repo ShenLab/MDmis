@@ -9,14 +9,16 @@ from sklearn.ensemble import RandomForestClassifier
 import pickle
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import roc_auc_score, roc_curve
-from sklearn.inspection import permutation_importance
-import scipy.stats as ss
 
+import scipy.stats as ss
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
 from predict_MDmis import *
 from evaluate_MDmis import *
-from compositional_analysis_AA import *
 
 
 
@@ -24,14 +26,11 @@ def main():
     pd.set_option("display.max_columns", 100)
     pd.set_option("display.max_rows", 100)
 
-    models_dir = "/home/az2798/MDmis/models/"
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results/DMS_ROCs"
-    vault_dir = "/share/vault/Users/az2798/"
-
-
-    aa_order = "ARNDCQEGHILKMFPSTWYV"
-    aaindex_res_mat = np.load(os.path.join(data_dir, "aa_index1.npy"))
+    models_dir = os.path.abspath(config["models_dir"])
+    data_dir = os.path.abspath(config["data_dir"]) 
+    results_dir = os.path.abspath(config["results_dir"])
+    
+    vault_dir = os.path.abspath(config["vault_dir"])
 
 
     outcome_column_name = "outcome"
@@ -97,13 +96,7 @@ def main():
                                                                     use_res_md = True,
              use_pair_md =  True, use_Cons= False, use_ESM_embed = False, use_conf_prop = False, regressor = False)
         
-        # MDmis_ESM1b = pickle.load(
-        #     open(os.path.join(models_dir, "fold_1", "MDmis_RF_ESM1b_MD"), "rb")
-        # )
-        # probability_table["MDmis_ESM1b_Scores"] = predict_MDmis(MDmis_ESM1b, entire_feature_table,
-        #     use_res_md = True,
-        #     use_pair_md =  True, use_Cons= True, use_ESM_embed = False,
-        #      use_conf_prop = False, use_ESM1b = True, regressor = False)
+       
     elif use_model == "DMS":
         MDmis_AAindex = pickle.load(
             open(os.path.join(models_dir, "MDmis_RF_AAIndex_DMS"), "rb")
@@ -263,8 +256,6 @@ def main():
                          'p-val': p_val, 'N': len(subset)})
 
     print(pd.DataFrame(rho_data), "Positive Control")
-
-
 
 
 if __name__ == "__main__":

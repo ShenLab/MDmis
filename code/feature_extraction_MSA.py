@@ -10,7 +10,13 @@ import glob
 from Bio import SeqIO
 import math
 import tqdm
-
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from utils import *
+from config import config
+from utils import *
 def cluster_AAs(AAIndex_features, n_PCs, num_clusters, clustering_method,
                 aa_order, results_dir):
     pca = PCA(n_components=n_PCs)
@@ -174,9 +180,9 @@ def compute_compositionality(variants_table, uniprot_column_name,
                     })
     return pd.DataFrame(results)
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
-    results_dir = "/home/az2798/MDmis/results"
-    MSA_dir = "/share/vault/Users/az2798/Zoonomia/MSA_by_uniprot/"
+    data_dir = os.path.abspath(config["data_dir"])
+    results_dir = os.path.abspath(config["results_dir"])
+    MSA_dir = os.path.abspath(config["vault_dir"])
     aa_order = "ARNDCQEGHILKMFPSTWYV"
 
     aa_charge_map = {"R": "Pos", "H": "Pos", "K": "Pos", "D": "Neg",

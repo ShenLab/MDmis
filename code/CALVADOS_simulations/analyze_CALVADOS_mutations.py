@@ -2,15 +2,17 @@ import subprocess
 import os
 import re
 import warnings
-import time
-import argparse
-import shutil
-import glob
 
+import glob
+import pathlib
 import numpy as np
 import pandas as pd
-
+import sys
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
 from utils import *
+from config import config
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
@@ -46,19 +48,7 @@ def compute_differences(res_feature_wt, pair_feature_wt,
                                                      axis = None)
     print(avg_pair_mutation_differences.shape)
     
-    #avg_pair_mutation_ratio = np.array(pair_feature_mutated[mutation_index, :, :] + 1e-3 / pair_feature_wt[mutation_index, :, :] + 1e-3)
-    #These should be same shape as our feature table (1,47) and (1,10), because they are location specific
-
-
-    #Secondly, compute global differences 
-    # print(np.linalg.norm(res_feature_mutated - res_feature_wt, axis = 1))
-    # residue_euclid_distance = np.mean(np.linalg.norm(res_feature_mutated - res_feature_wt, axis = 1))
-    # print(residue_euclid_distance)
-
-    # average_residue_difference = np.mean(res_feature_mutated - res_feature_wt, axis = 0)
-
-
-    #Thirdly, compute how conformational properties change
+    #Secondly, compute how conformational properties change
     Rg_difference = conformational_properties_mutated[0] - conformational_properties_wt["Rg"].values[0]
     Ete_difference = conformational_properties_mutated[1] - conformational_properties_wt["ete"].values[0]
     nu_difference = conformational_properties_mutated[2] - conformational_properties_wt["nu"].values[0]
@@ -75,8 +65,9 @@ def compute_differences(res_feature_wt, pair_feature_wt,
 
 
 def main():
-    data_dir = "/home/az2798/MDmis/data/"
-    h5py_path = "/share/vault/Users/az2798/train_data_all/filtered_feature_all_ATLAS_GPCRmd_IDRome.h5"
+    data_dir = os.path.abspath(config["data_dir"])
+
+    h5py_path = os.path.abspath["h5py_path"]
     res_data, pair_data = load_MD_data(h5py_path)
     
     wt_conformational_properties = pd.read_csv(os.path.join(
@@ -96,7 +87,7 @@ def main():
                                             "Ete_Distance", "nu_Difference", "nu_FC",
                                             "Mutation_ID", "Mutation_Category"])
     
-    processed_CALVADOS_directory =  "/nfs/user/Users/az2798/processed_CALVADOS/"
+    processed_CALVADOS_directory = os.path.abspath(config["CALVADOS_processed_dir"])
 
     for mutation_category_dir in glob.glob(os.path.join(processed_CALVADOS_directory, "*")):
         mutation_category = os.path.basename(mutation_category_dir)
@@ -163,68 +154,10 @@ def main():
     print(mutation_differences_df.head())
 
     mutation_differences_df.to_csv(
-         "/home/az2798/MDmis/data/calvados_mutation_differences.csv"
+         os.path.join(data_dir, "calvados_mutation_differences.csv")
     )
 
-    ############
-    # shorter_runs_differences_df = pd.DataFrame(columns= res_md_diff_columns + res_md_fc_columns + 
-    #                                         pair_md_columns + average_residue_difference_columns+
-    #                                         ["Res_Euclid","Rg_Difference",
-    #                                          "Ete_Distance", "Mutation_ID", "Mutation_Category"])
     
-    # processed_CALVADOS_directory =  "/nfs/user/Users/az2798/processed_CALVADOS/"
-
-    # for folder in glob.glob(os.path.join(processed_CALVADOS_directory,
-    #                                       "Shorter_simulations", "*")):
-
-    #     mutation_index = 0
-
-    #     wt_name = os.path.basename(folder)
-    #     print(wt_name)  
-
-    #     res_feature_wt = res_data[wt_name]
-    #     pair_feature_wt = pair_data[wt_name]
-
-    #     print(pair_feature_wt.shape)
-    #     res_feature_mutated = np.load(os.path.join(
-    #         folder, "res_feature.npy"
-    #     ))
-    #     pair_feature_mutated = np.load(os.path.join(
-    #         folder, "pair_feature.npy"
-    #     ))
-    #     conformational_properties_mutated = np.load(os.path.join(
-    #         folder, "conformational_properties.npy"
-    #     ))
-    #     (residue_mutation_difference,
-    #         residue_mutation_ratio,
-    #         avg_pair_mutation_difference,
-    #         average_residue_difference,
-    #         residue_euclid_distance,
-    #         Rg_difference,
-    #         Ete_difference) = compute_differences(
-    #                         res_feature_wt, pair_feature_wt,
-    #                         res_feature_mutated, pair_feature_mutated,
-    #                         conformational_properties_wt=wt_conformational_properties[
-    #                             wt_conformational_properties["seq_name"] == wt_name],
-    #                         conformational_properties_mutated=conformational_properties_mutated,
-    #                         mutation_index = mutation_index)
-        
-    #     shorter_runs_differences_df.loc[len(shorter_runs_differences_df.index)]= np.concatenate(
-    #         (residue_mutation_difference, residue_mutation_ratio,
-    #             avg_pair_mutation_difference,
-    #             average_residue_difference,
-    #         residue_euclid_distance,
-    #         Rg_difference, Ete_difference,
-    #         np.array([wt_name, "Pathogenic_High_RMSF"])),  
-    #         axis = None
-    #     )
-
-
-    # print(shorter_runs_differences_df.head())
-
-    # shorter_runs_differences_df.to_csv(
-    #     "/home/az2798/MDmis/data/shorter_runs_differences.csv"
-    # )   
 
     
 if __name__ == "__main__":

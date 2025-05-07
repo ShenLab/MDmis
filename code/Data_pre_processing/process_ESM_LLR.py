@@ -1,13 +1,17 @@
 import pandas as pd
 import glob
 import os
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parent
+sys.path.append(ROOT)
+from config import config
 
-
-vault_dir = "/nfs/user/Users/az2798/ESM1b_data/content/ALL_hum_isoforms_ESM1b_LLR/"
-output_dir = "/nfs/user/Users/az2798/ESM1b_data/"
+ESM1b_dir = os.path.join(os.path.abspath(config["vault_dir"]),"ALL_hum_isoforms_ESM1b_LLR") #point this to where the LLR files for all isoforms exist
+output_dir = os.path.abspath(config["vault_dir"])
 
 LLR_dataframes = []
-for protein_file in glob.glob(os.path.join(vault_dir, "*")):
+for protein_file in glob.glob(os.path.join(ESM1b_dir, "*")):
     protein_id = os.path.basename(protein_file).split("_")[0]
 
     LLR_df = pd.read_csv(protein_file)
