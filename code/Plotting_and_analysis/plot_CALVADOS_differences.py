@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 from utils import *
@@ -24,9 +24,30 @@ def main():
         data_dir,"calvados_mutation_differences.csv")
         , index_col=0
     )
+    ## Change Long and Short to >800aa and <=800aa
+    mutation_differences_df["Mutation_Category"] = mutation_differences_df["Mutation_Category"].replace({
+        "Pathogenic - Long IDRs": "Pathogenic >800aa", "Pathogenic - Short IDRs": "Pathogenic <=800aa"
+    })
+    mutation_differences_df["start"] = mutation_differences_df["Mutation_ID"].str.split("_").str[1].astype(int)
+    mutation_differences_df["end"] = mutation_differences_df["Mutation_ID"].str.split("_").str[2].astype(int)
+
+    mutation_differences_df["Region Length"] = mutation_differences_df["end"] - mutation_differences_df["start"] +1
+
+    mutation_differences_df['Mutation_Category'] = np.select(
+        [
+            mutation_differences_df['Mutation_Category'] == "Pathogenic >800aa",
+            mutation_differences_df['Mutation_Category'] == "Pathogenic <=800aa",
+            (mutation_differences_df["Mutation_Category"] == "Benign") &
+            (mutation_differences_df["Region Length"] > 800),
+            (mutation_differences_df['Mutation_Category'] == "Benign") &
+            (mutation_differences_df["Region Length"] <= 800)
+        ],
+        ['Pathogenic >800aa', 'Pathogenic <=800aa', 'Benign >800aa', 'Benign <=800aa']
+    )
+
     print(mutation_differences_df["Mutation_Category"].value_counts())
-    length_palette = {"Pathogenic - Long IDRs": "#e81a1a", "Pathogenic - Short IDRs": "#f5ed11",
-                      "Benign": "#3497ed"}
+    length_palette = {"Pathogenic >800aa": "#e81a1a", "Pathogenic <=800aa": "#f5ed11",
+                       "Benign >800aa": "#70bafa",  'Benign <=800aa': "#188ff5"}
     significance_levels = {0.0001: '***', 0.001: '**', 0.05: '*'}
     
     # plot_boxplot_with_significance(

@@ -19,8 +19,8 @@ pd.set_option('display.max_rows', None)
 
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 def main():

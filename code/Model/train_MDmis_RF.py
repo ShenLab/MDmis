@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 import pathlib
 import sys
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 
@@ -337,7 +337,7 @@ def main():
 
     print("Feature Table for Splits", feature_table_with_ESM1b.shape)
 
-    create_folds(feature_table_with_ESM1b, "UniProtID",
+    create_folds(feature_table_with_ESM1b, "Cluster", ## split instead by protein cluster
                  os.path.join(data_dir, "clinical_train_val"))
     
 

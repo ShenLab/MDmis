@@ -8,8 +8,8 @@ import pathlib
 import numpy as np
 import pandas as pd
 import sys
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 

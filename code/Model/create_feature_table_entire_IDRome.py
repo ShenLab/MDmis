@@ -11,8 +11,8 @@ import argparse
 import scipy.stats as ss
 import pathlib
 import sys
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 sys.path.append(os.path.join(ROOT, "Data_processing/"))
 from utils import *
 from predict_MDmis import *

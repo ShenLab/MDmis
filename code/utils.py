@@ -149,6 +149,7 @@ def create_feature_table(df_table, res_data, pair_data, aa_res_matrix,
                     **{f"One_Hot_{j+1}": val for j, val in enumerate(one_hot_diff)},
                     "outcome": row[outcome_column_name],
                     "UniProtID": row["UniProtID"],
+                    "Cluster": row["Cluster"],
                     "protein_start_end": row["protein_start_end"],
                     "location": location_variant,
                     "Label Source": label_source,
@@ -446,7 +447,7 @@ def plot_rhos_by_Uniprot(val_feature_table, list_of_y_probs, outcome_column_name
     fig.savefig(figure_path.replace(".png", "_scatter_grid.png"), dpi=300, bbox_inches="tight")
 
 def plot_rhos_by_group(val_feature_table, list_of_y_probs, outcome_column_name,
-              group_column_name, title, labels, figure_path):
+              group_column_name, title, labels, figure_path, df_path):
     """
     Plots violin plots for multiple sets of predicted probabilities, calculating Spearman rho
     for each UniProtID and displaying the distributions.
@@ -491,6 +492,7 @@ def plot_rhos_by_group(val_feature_table, list_of_y_probs, outcome_column_name,
 
     rho_df = pd.DataFrame(rho_data)
     print(rho_df)
+    rho_df.to_csv(df_path)
     plt.figure(figsize=(12, 7))
     sns.violinplot(x="Model", y="Spearman Rho", data=rho_df, inner="point", palette="Set2")
     plt.axhline(0, color='red', linestyle='--', linewidth=0.8)
@@ -566,7 +568,7 @@ def plot_ridgeplot(data, group_col, value_col, results_dir, plot_filename,
     groups.sort()  
     num_groups = len(groups)
 
-    fig, ax = plt.subplots(nrows = 3, figsize=(8, 6), sharex = True) 
+    fig, ax = plt.subplots(nrows = num_groups, figsize=(8, 6), sharex = True) 
 
     if palette is None:
         palette = sns.color_palette("husl", num_groups)  
@@ -674,6 +676,7 @@ def plot_boxplot_with_significance(
 
     data.sort_values(by = group_col, inplace = True)
     #Select plot type
+    plt.figure(figsize=(10,7))
     if plot_type == "box":
         if palette is not None:
             ax =sns.boxplot(data=data, x=group_col, y=value_col, palette=palette)

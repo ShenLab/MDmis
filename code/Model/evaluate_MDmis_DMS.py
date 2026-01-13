@@ -13,8 +13,8 @@ import seaborn as sns
 import scipy.stats as ss
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 from predict_MDmis import *
@@ -169,7 +169,7 @@ def main():
 
     proteome_information_subset = proteome_information[[
         "UniProtID", "location", "am_pathogenicity", "ESM_probabilities", "changed_aa_amis", "GERP++_RS",
-        "DMS_score_bin", "DMS_score", "Assay_Type"
+        "DMS_score_bin", "DMS_score", "Assay_Type", "File_Name"
     ]]
 
 
@@ -228,8 +228,27 @@ def main():
                "ESM1b",
                "AlphaMissense",
                "AlphaMissense + MDmis (Res + Pair)"],
-                os.path.join(results_dir, f"DMS_rhos_using_{use_model}_MDmis.png"))
+                os.path.join(results_dir, f"DMS_rhos_using_{use_model}_MDmis.png"),
+                os.path.join(data_dir, "DMS_rhos_by_assay_type.csv"))
+    plt.clf()
     
+    plot_rhos_by_group(validation_set_information, 
+              probability_table[["MDmis_AAIndex_Scores",
+                                 "MDmis_Res_Scores",
+                                 "MDmis_Res_Pair_Scores",
+                                 "ESM1b_Scores",
+                                 "AlphaMissense_Scores",
+                                 "Average_Amis_MDmis_Scores"]].to_numpy().transpose(),
+                                "DMS_score",
+              "File_Name", "DMS (IDRs)", 
+              ["MDmis (AAIndex)", 
+               "MDmis (Res)",
+               "MDmis (Res + Pair)",
+               "ESM1b",
+               "AlphaMissense",
+               "AlphaMissense + MDmis (Res + Pair)"],
+                os.path.join(results_dir, f"DMS_rhos_using_{use_model}_MDmis.png"),
+                os.path.join(data_dir, "DMS_rhos_by_assay_individual.csv"))
     ##Positive control for AM
     proteome_information_subset.dropna(axis = 0, subset = ["am_pathogenicity"],
                                          inplace = True)
@@ -258,5 +277,13 @@ def main():
     print(pd.DataFrame(rho_data), "Positive Control")
 
 
+    for group in proteome_information_subset["File_Name"].unique():
+        subset = proteome_information_subset[proteome_information_subset["Assay_Type"] == group]
+        rho, p_val = ss.spearmanr(subset["DMS_score"], subset["ESM_probabilities"])
+        rho_data.append({"Group": group, 'Spearman Rho': rho, 
+                         'p-val': p_val, 'N': len(subset)})
+
+    #print(pd.DataFrame(rho_data), "Positive Control")
+    rho_data.to_csv(os.path.join(data_dir, "DMS_rhos_by_assay_individual_poscontrol.csv"))
 if __name__ == "__main__":
     main()

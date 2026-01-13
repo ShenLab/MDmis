@@ -5,12 +5,10 @@ from matplotlib import gridspec
 import os
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
-from utils import *
-
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 
@@ -19,7 +17,7 @@ vault_dir = os.path.abspath(config["vault_dir"])
 data_dir = os.path.abspath(config["data_dir"])
 
 clinvar_labels_df = pd.read_csv(os.path.join(vault_dir, "ClinVar_Data", "training.csv")) 
-MD_metadata = pd.read_csv(os.path.join(data_dir, "MD_metadata.csv"),
+MD_metadata = pd.read_csv(os.path.join(data_dir, "MD_metadata_clustered.csv"),
                                     index_col=0)
 
 MD_metadata.rename(columns={"source": "MD Data Source"}, inplace=True)

@@ -7,8 +7,8 @@ from process_md_trajectory import *
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from config import config
 
 

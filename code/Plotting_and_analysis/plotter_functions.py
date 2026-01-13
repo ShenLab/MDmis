@@ -14,6 +14,10 @@ import os
 import re
 import warnings
 from sklearn.linear_model import LinearRegression
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 
 
@@ -354,9 +358,9 @@ def plot_DSSP(MD_table, structured_dssp_column_names,
                     MD_res_features_pathogenic[Length_column_name] > Length_cutoff,
                     MD_res_features_pathogenic[Length_column_name] <= Length_cutoff
                 ],
-                ['Long IDRs', 'Short IDRs']
+                ['>800aa', '<=800aa']
             )
-            palette = {"Long IDRs": "#e81a1a", "Short IDRs": "#f5ed11"}
+            palette = {">800aa": "#e81a1a", "<=800aa": "#f5ed11"}
 
             #Plot for RMSF/pLDDT categories
             plt.figure(figsize=(10, 6))
@@ -372,10 +376,10 @@ def plot_DSSP(MD_table, structured_dssp_column_names,
             num_tests = len(dssp_labels)
             for i, dssp_col in enumerate(dssp_labels):
                 long_values = MD_res_features_pathogenic.loc[
-                    (MD_res_features_pathogenic['Length Category'] == 'Long IDRs') &
+                    (MD_res_features_pathogenic['Length Category'] == '>800aa') &
                     (MD_res_features_pathogenic['DSSP'] == dssp_col)]["Proportion"]
                 short_values = MD_res_features_pathogenic.loc[
-                    (MD_res_features_pathogenic['Length Category'] == 'Short IDRs') &
+                    (MD_res_features_pathogenic['Length Category'] == '<=800a') &
                     (MD_res_features_pathogenic['DSSP'] == dssp_col)]["Proportion"]
 
                 if len(long_values) > 0 and len(short_values) > 0:

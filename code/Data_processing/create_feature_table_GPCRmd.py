@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 from utils import *
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 

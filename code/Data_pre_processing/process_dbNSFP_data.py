@@ -5,8 +5,8 @@ pd.set_option('display.max_columns', 500)
 import os
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from config import config
 
 def filter_merge_dbNSFP( list_of_dbNSFP_files, protein_info_columns, metrics_columns,

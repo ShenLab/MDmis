@@ -16,8 +16,8 @@ import warnings
 warnings.filterwarnings("ignore")
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 from predict_MDmis import *
@@ -201,7 +201,7 @@ def main():
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, None, "Validation performance for Long IDRs", 
+                     outcome_column_name, None, "Validation performance for IDRs >800aa", 
                      os.path.join(results_dir, "Clinical_ROCs",
                                   "ROC_longIDRs.png"))
     
@@ -209,28 +209,28 @@ def main():
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, 0.05, "Validation performance for Long IDRs", 
+                     outcome_column_name, 0.05, "Validation performance for IDRs >800aa", 
                      os.path.join(results_dir, "Clinical_ROCs",
                                   "ROC_longIDRs_0.05.png"))
     plot_average_roc(IDRs_table[IDRs_table["Length_Category"] == "Long IDRs"],
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, 0.1, "Validation performance for Long IDRs", 
+                     outcome_column_name, 0.1, "Validation performance for IDRs >800aa", 
                      os.path.join(results_dir, "Clinical_ROCs",
                                   "ROC_longIDRs_0.1.png"))
     plot_average_roc(IDRs_table[IDRs_table["Length_Category"] == "Short IDRs"],
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, None, "Validation performance for Short IDRs", 
+                     outcome_column_name, None, "Validation performance for IDRs <=800aa", 
                      os.path.join(results_dir, "Clinical_ROCs",
                                   "ROC_shortIDRs.png"))
     plot_average_roc(IDRs_table[IDRs_table["Length_Category"] == "Short IDRs"],
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, 0.1, "Validation performance for Short IDRs", 
+                     outcome_column_name, 0.1, "Validation performance for IDRs <=800aa", 
                      os.path.join(results_dir, "Clinical_ROCs",
                                   "ROC_shortIDRs_0.1.png"))
     
@@ -238,16 +238,16 @@ def main():
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, 0.1, "Validation performance for highly conserved sites", 
+                     outcome_column_name, None, "Validation performance for highly conserved sites", 
                      os.path.join(results_dir, "Clinical_ROCs",
-                                  "ROC_high_constraint_0.1.png"))
+                                  "ROC_high_constraint.png"))
     plot_average_roc(IDRs_table[IDRs_table["GERP_Category"] == "Low Constraint"],
                      predictions_labels_dict,
                      5,
                      "Fold",
-                     outcome_column_name, 0.1, "Validation performance for poorly conserved sites", 
+                     outcome_column_name, None, "Validation performance for poorly conserved sites", 
                      os.path.join(results_dir, "Clinical_ROCs",
-                                  "ROC_low_constraint_0.1.png"))
+                                  "ROC_low_constraint.png"))
 
 
     feature_dict = {"Res_MD_3": "RMSF",

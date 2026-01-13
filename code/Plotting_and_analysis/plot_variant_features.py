@@ -10,8 +10,8 @@ import warnings
 
 import sys
 import pathlib
-ROOT = pathlib.Path(__file__).parent
-sys.path.append(ROOT)
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
 from utils import *
 from config import config
 from plotter_functions import *
@@ -107,9 +107,12 @@ def main():
             (IDRs_table["Region Length"] > 800),
             (IDRs_table["Variant Effect"] == "Pathogenic") &
             (IDRs_table["Region Length"] <= 800),
-            IDRs_table["Variant Effect"] == "Benign"
+            (IDRs_table["Variant Effect"] == "Benign") &
+            (IDRs_table["Region Length"] > 800),
+            (IDRs_table["Variant Effect"] == "Benign") &
+            (IDRs_table["Region Length"] <= 800)
         ],
-        ['Pathogenic - Long IDRs', 'Pathogenic - Short IDRs', 'Benign']
+        ['Pathogenic >800aa', 'Pathogenic <=800aa', 'Benign >800aa', 'Benign <=800aa']
     )
 
 
@@ -121,8 +124,8 @@ def main():
 
 
     #### Plotting begins below!
-    length_palette = {"Pathogenic - Long IDRs": "#e81a1a", "Pathogenic - Short IDRs": "#f5ed11",
-                      "Benign": "#3497ed"}
+    length_palette = {"Pathogenic >800aa": "#e81a1a", "Pathogenic <=800aa": "#f5ed11",
+                      "Benign >800aa": "#70bafa",  'Benign <=800aa': "#188ff5"}
     variant_palette = {"Pathogenic": "#ffa500", "Benign": "#3497ed"}
 
 
@@ -131,6 +134,7 @@ def main():
                        IDRs_table["am_pathogenicity"], nan_policy="omit"),
                        "Corr between ESM and AM")
     plt.figure(figsize=(10,10))
+
     g = sns.jointplot(data= IDRs_table, x="ESM_probabilities",
                     y = "am_pathogenicity", hue="Length Category",
                     palette = length_palette,
@@ -138,8 +142,7 @@ def main():
                              'alpha': 0.7},
                     joint_kws = {'alpha':0.5})
     g.ax_joint.legend_.set_title(None)
-    sns.move_legend(g.figure.axes[0], loc='upper left', bbox_to_anchor=(1.19, 1),
-                    labels = ["Benign", "Pathogenic\nShort IDRs", "Pathogenic\nLong IDRs"])
+    sns.move_legend(g.figure.axes[0], loc='upper left', bbox_to_anchor=(1.19, 1))
 
     plt.xlim(0.2,0.8)
     plt.ylim(0,1)
@@ -148,7 +151,7 @@ def main():
     plt.savefig(os.path.join(results_dir, "IDR_ESM1b_AM_corr.png"),
                 dpi = 300, bbox_inches = "tight")
     plt.clf()
-    
+    exit()
     ###
 
     plot_GERP_info(IDRs_table, other_regions_table, GERP_column_name,

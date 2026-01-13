@@ -76,7 +76,8 @@ def get_dssp_sasa_chi1_rmsf_cov(traj, seq, ca_atoms, N, n_frames):
         for i in range(angles[angle][1].shape[1]):
             counts, bins = np.histogram(angles[angle][1][:, i], bins=angle_bins)
             angle_count.append(counts)
-
+        print(angles)
+        print(angle_count)
         angle_tab = pd.DataFrame(
             np.array(angle_count), columns=[f"{angle}_{k}" for k in range(12)]
         )
