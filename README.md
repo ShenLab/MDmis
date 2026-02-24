@@ -55,14 +55,17 @@ Example output: {data_dir}/clinical_train_val_interactioncutoff_0.4/feature_tabl
 3. ```python code/Model/train_MDmis_RF.py --interaction_cutoff 0.4```
  
 Example outputs: 
+
 {data_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/train.csv and {data_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/val.csv
 
 {model_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/{model_prefix}.pkl
 
 4. ```python code/Model/evaluate_MDmis.py --interaction_cutoff 0.4```
+5. 
 Example outputs: {results_dir}/Clinical_ROCs/{interaction_cutoff}/{testing_set}.png
 
-5. If you want to create your own IDRome-wide processed data set with model predictions
+6. If you want to create your own IDRome-wide processed data set with model predictions
+
 ```python code/Model/create_feature_table_entire_IDRome.py --interaction_cutoff 0.4 --chunk 0```
 
 Example output: {vault_dir}/MDmis_predictions/{IDRome_ID}/predictions.csv
