@@ -8,6 +8,7 @@ functional annotations of protein residue sites and protein regions, and we perf
 # Code and general information
 This repository contains the code used to train MDmis, perform analysis, run simulations of mutated sequences, and extract features. All code uses Python and Command Line.
 
+## Installation
 We recommend installing the prequisite packages using pip on conda as listed below:
 
 . pandas
@@ -36,12 +37,27 @@ You may also opt to use our environment file MDmis_env.yml. You can install this
 ```conda env create -f MDmis_env.yml``` 
 **Note that it may only work for linux OS.**
 
+## Other environments needed for additional analyses
 Other analysis, such as simulating MD trajectories using CALVADOS2, converting coarse-grained trajectories to all-atom, and then processing MD trajectories with GetContacts require their own environments due to conflicts in packages and their versions. We refer you to 
 1. https://github.com/KULL-Centre/CALVADOS.git
 2. https://github.com/huhlim/cg2all.git
 3. https://github.com/getcontacts/getcontacts.git
    
 Respectively for their codebase and setup. 
+
+## Example code usage (for training MDmis) and output
+1. Edit ```config.py``` with correct paths based on your project setup.
+2. ```python code/Data_processing/create_feature_clinical_table.py```
+
+Example output: {data_dir}/feature_table.csv
+
+3. ```python code/Model/train_MDmis_RF.py```
+Example outputs: {data_dir}/fold_{k}/train.csv and {data_dir}/fold_{k}/val.csv
+
+{model_dir}/fold_{k}/{model_prefix}.pkl
+
+4. ```python code/Model/evaluate_MDmis.py```
+Example outputs: {results_dir}/Clinical_ROCs/{interaction_cutoff}/{testing_set}.png
 
 # Data
 All processed data used in these analyses are provided in our Zenodo repository. The DOI for our repository is: 10.5281/zenodo.15346250
