@@ -47,17 +47,25 @@ Respectively for their codebase and setup.
 
 ## Example code usage (for training MDmis) and output
 1. Edit ```config.py``` with correct paths based on your project setup.
-2. ```python code/Data_processing/create_feature_clinical_table.py```
+   
+2. ```python code/Data_processing/create_feature_clinical_table.py --interaction_cutoff 0.4 --window_size 3```
 
-Example output: {data_dir}/feature_table.csv
+Example output: {data_dir}/clinical_train_val_interactioncutoff_0.4/feature_table.csv
 
-3. ```python code/Model/train_MDmis_RF.py```
-Example outputs: {data_dir}/fold_{k}/train.csv and {data_dir}/fold_{k}/val.csv
+3. ```python code/Model/train_MDmis_RF.py --interaction_cutoff 0.4```
+ 
+Example outputs: 
+{data_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/train.csv and {data_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/val.csv
 
-{model_dir}/fold_{k}/{model_prefix}.pkl
+{model_dir}/clinical_train_val_interactioncutoff_0.4/fold_{k}/{model_prefix}.pkl
 
-4. ```python code/Model/evaluate_MDmis.py```
+4. ```python code/Model/evaluate_MDmis.py --interaction_cutoff 0.4```
 Example outputs: {results_dir}/Clinical_ROCs/{interaction_cutoff}/{testing_set}.png
+
+5. If you want to create your own IDRome-wide processed data set with model predictions
+```python code/Model/create_feature_table_entire_IDRome.py --interaction_cutoff 0.4 --chunk 0```
+
+Example output: {vault_dir}/MDmis_predictions/{IDRome_ID}/predictions.csv
 
 # Data
 All processed data used in these analyses are provided in our Zenodo repository. The DOI for our repository is: 10.5281/zenodo.15346250
