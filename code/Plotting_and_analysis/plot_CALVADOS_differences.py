@@ -1,0 +1,245 @@
+import os
+import warnings
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+import sys
+import pathlib
+ROOT = pathlib.Path(__file__).parents[1]
+sys.path.append(str(ROOT))
+from utils import *
+from config import config
+from utils import *
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+def main():
+    data_dir = os.path.abspath(config["data_dir"])
+    results_dir = os.path.join(os.path.abspath(config["results_dir"]), "CALVADOS_figures")
+
+    mutation_differences_df = pd.read_csv(os.path.join(
+        data_dir,"calvados_mutation_differences.csv")
+        , index_col=0
+    )
+    ## Change Long and Short to >800aa and <=800aa
+    mutation_differences_df["Mutation_Category"] = mutation_differences_df["Mutation_Category"].replace({
+        "Pathogenic - Long IDRs": "Pathogenic >800aa", "Pathogenic - Short IDRs": "Pathogenic <=800aa"
+    })
+    mutation_differences_df["start"] = mutation_differences_df["Mutation_ID"].str.split("_").str[1].astype(int)
+    mutation_differences_df["end"] = mutation_differences_df["Mutation_ID"].str.split("_").str[2].astype(int)
+
+    mutation_differences_df["Region Length"] = mutation_differences_df["end"] - mutation_differences_df["start"] +1
+
+    mutation_differences_df['Mutation_Category'] = np.select(
+        [
+            mutation_differences_df['Mutation_Category'] == "Pathogenic >800aa",
+            mutation_differences_df['Mutation_Category'] == "Pathogenic <=800aa",
+            (mutation_differences_df["Mutation_Category"] == "Benign") &
+            (mutation_differences_df["Region Length"] > 800),
+            (mutation_differences_df['Mutation_Category'] == "Benign") &
+            (mutation_differences_df["Region Length"] <= 800)
+        ],
+        ['Pathogenic >800aa', 'Pathogenic <=800aa', 'Benign >800aa', 'Benign <=800aa']
+    )
+
+    print(mutation_differences_df["Mutation_Category"].value_counts())
+    length_palette = {"Pathogenic >800aa": "#e81a1a", "Pathogenic <=800aa": "#f5ed11",
+                       "Benign >800aa": "#70bafa",  'Benign <=800aa': "#188ff5"}
+    significance_levels = {0.0001: '***', 0.001: '**', 0.05: '*'}
+    
+    # plot_boxplot_with_significance(
+    #     mutation_differences_df,
+    #     "Mutation_Category",
+    #     "Res_MD_Diff_1",
+    #     results_dir, "SASA_Difference.png",
+    #     significance_levels,
+    #     title= 'Mutated vs WT MD', xlabel='Length Category', ylabel='SASA Difference',
+    #     plot_type = "violin", bar_height = 0.4, palette = length_palette
+    # )
+    
+    # plt.clf()
+
+    plot_ridgeplot(
+        data=mutation_differences_df,
+        group_col='Mutation_Category',
+        value_col="Res_MD_Diff_1",
+        results_dir=results_dir,
+        xlabel = "SASA Difference",
+        plot_filename="SASA_Difference.png",
+        label_placement ="left", palette = length_palette, 
+        xlim = (-2,2), bar_height = 0.025, xlim_buffer = 1.025
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Res_MD_Diff_3",
+        results_dir, "RMSF_Difference.png",
+        significance_levels,
+        title='Mutated vs WT MD', xlabel='Length Category', ylabel='RMSF Difference',
+        plot_type = "violin", palette = length_palette
+    )
+    
+
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Res_MD_FC_4",
+        results_dir, "B_Bridge_FC.png",
+        significance_levels,
+        title='Mutated vs WT MD', xlabel='Length Category', ylabel='Beta Bridges Ratio',
+        plot_type = "violin", palette = length_palette
+    )
+    
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Res_MD_Diff_4",
+        results_dir, "B_Bridge_Diff.png",
+        significance_levels,
+        title='Mutated vs WT MD', xlabel='Length Category', ylabel='Beta Bridges Diff',
+        plot_type = "violin", palette = length_palette
+    )
+    
+    plt.clf()
+
+
+    plot_ridgeplot(
+        data=mutation_differences_df,
+        group_col='Mutation_Category',
+        value_col="Res_MD_FC_8",
+        results_dir=results_dir,
+        xlabel = "3 Helix Ratio",
+        plot_filename="3_Helix_FC.png",
+        label_placement ="right", palette = length_palette, 
+        xlim = (0,4), bar_height = 0.05, xlim_buffer = 1.025
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Res_MD_Diff_8",
+        results_dir, "3_Helix_Diff.png",
+        significance_levels,
+        title='Mutated vs WT MD', xlabel='Length Category', ylabel='3 Helix Diff',
+        plot_type = "violin", palette = length_palette
+    )
+    plt.clf()
+
+    # plot_boxplot_with_significance(
+    #     mutation_differences_df,
+    #     "Mutation_Category",
+    #     "Avg_Pair_MD_Diff_1",
+    #     results_dir, "Avg_Pair_1.png",
+    #     significance_levels,
+    #     title='', xlabel='Length Category', ylabel='Difference in VDW Forces',
+    #     plot_type = "violin", bar_height = 2, palette = length_palette, verbose = True
+    # )
+    # plt.clf()
+
+    plot_ridgeplot(
+        data=mutation_differences_df,
+        group_col='Mutation_Category',
+        value_col="Avg_Pair_MD_Diff_1",
+        results_dir=results_dir,
+        xlabel = "Difference in VDW Forces",
+        plot_filename="VDW_Differences.png",
+        label_placement ="left", palette = length_palette, 
+        xlim = (-20,0), bar_height = 0.025, xlim_buffer = 1.025
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Avg_Pair_MD_FC_1",
+        results_dir, "Avg_Pair_FC_1.png",
+        significance_levels,
+        title='', xlabel='Length Category', ylabel='Ratio of VDW Forces',
+        plot_type = "violin", bar_height = 2, palette = length_palette
+    )
+    plt.clf()
+
+    plot_ridgeplot(
+        data=mutation_differences_df,
+        group_col='Mutation_Category',
+        value_col="Avg_Pair_MD_Diff_2",
+        results_dir=results_dir,
+        xlabel = "Difference in Hydrogen Bonds\nBB-BB",
+        plot_filename="HBBB_Diff.png",
+        label_placement ="right", palette = length_palette,
+        bar_height = 0.025, xlim_buffer = 1.025, type="bar"
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Avg_Pair_MD_Diff_3",
+        results_dir, "Avg_Pair_3.png",
+        significance_levels,
+        title='', xlabel='Length Category', ylabel='Difference in HBSB',
+        plot_type = "violin",  bar_height = 2, palette = length_palette
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Avg_Pair_MD_Diff_10",
+        results_dir, "Avg_Pair_10.png",
+        significance_levels,
+        title='', xlabel='Length Category', ylabel='Difference in Covariance',
+        plot_type = "violin",  bar_height = 0.05, palette = length_palette
+    )
+    plt.clf()
+    
+    
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Rg_Difference",
+        results_dir, "Rg_Diff.png",
+        significance_levels,
+        title='', xlabel='Length Category', ylabel='Difference in Radius of Gyration',
+        plot_type = "violin"
+    )
+    plt.clf()
+
+    plot_boxplot_with_significance(
+        mutation_differences_df,
+        "Mutation_Category",
+        "Ete_Distance",
+        results_dir, "Ete_Diff.png",
+        significance_levels,
+        title='', xlabel='Length Category', ylabel='Difference in ETE Distance',
+        plot_type = "violin"
+    )
+    plt.clf()
+
+    
+
+    plot_ridgeplot(
+        data=mutation_differences_df,
+        group_col='Mutation_Category',
+        value_col="nu_Difference",
+        results_dir=results_dir,
+        xlabel = "Difference in Nu",
+        plot_filename="nu_Diff.png",
+        label_placement ="right", palette = length_palette, 
+        xlim = (-0.07, 0.07), bar_height = 0.025, xlim_buffer = 1.025
+    )
+    plt.clf()
+
+if __name__ == "__main__":
+    main()
